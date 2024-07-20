@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World City Map</title>
+    <style>
+        #worldMap {
+            height: 400px;
+        }
+
+        #map-title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+    <h1 id="map-title">World City Map</h1>
+    <div id="worldMap"></div>
+    <script>
+        // Create the map
+        var mymap = L.map('worldMap').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+        }).addTo(mymap);
+
+        // Fetch data from the CSV file
+        d3.csv("cities.csv").then(function (data) {
+            // Filter data to keep City, Latitude, Longitude, and Country
+            data = data.map(function (d) {
+                return {
+                    city: d.City,
+                    country: d.Country,
+                    latitude: d.Latitude,
+                    longitude: d.Longitude,
+                };
+            });
+
+            // Center the map based on data
+            var bounds = new L.LatLngBounds([]);
+            data.forEach(function (d) {
+                bounds.extend([d.latitude, d.longitude]);
+            });
+            mymap.fitBounds(bounds);
+
+            // Plot cities on the map with popups
+            data.forEach(function (d) {
+                L.marker([d.latitude, d.longitude])
+                    .addTo(mymap)
+                    .bindPopup(d.city + ', ' + d.country)
+                    .openPopup();
+            });
+        });
+    </script>
+</body>
+
+</html>
