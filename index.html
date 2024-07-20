@@ -6,13 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>World City Map</title>
     <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
         #worldMap {
             height: 400px;
+            width: 80%;
+            margin: 20px 0;
         }
 
         #map-title {
             text-align: center;
             margin-bottom: 10px;
+        }
+
+        #csvFileInput {
+            margin-bottom: 20px;
+        }
+
+        .centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -21,9 +45,13 @@
 </head>
 
 <body>
-    <h1 id="map-title">World City Map</h1>
-    <input type="file" id="csvFileInput" accept=".csv" onchange="uploadCSV(event)" />
+    <div class="centered">
+        <h1 id="map-title">World City Map</h1>
+        <input type="file" id="csvFileInput" accept=".csv" onchange="uploadCSV(event)" />
+    </div>
+   
     <div id="worldMap"></div>
+
     <script>
         // Create the map 
         var mymap = L.map('worldMap').setView([20, 0], 2);
