@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>World City Map</title>
     <style>
         #worldMap {
@@ -22,41 +22,64 @@
 
 <body>
     <h1 id="map-title">World City Map</h1>
+    <input type="file" id="csvFileInput" accept=".csv" onchange="uploadCSV(event)" />
     <div id="worldMap"></div>
     <script>
-        // Create the map
+        // Create the map 
         var mymap = L.map('worldMap').setView([20, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 20,
-        }).addTo(mymap);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20, }).addTo(mymap);
 
-        // Fetch data from the CSV file
+        var markersLayer = L.layerGroup().addTo(mymap);
+
+        // Function to handle csv file upload
+        function uploadCSV(event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                markersLayer.clearLayers(); // Remove existing markers
+                var data = d3.csvParse(reader.result);
+                plotCities(data);
+            };
+            reader.readAsText(file);
+        }
+
+        // Fetch data from the default CSV file (cities.csv)
         d3.csv("cities.csv").then(function (data) {
-            // Filter data to keep City, Latitude, Longitude, and Country
+            plotCities(data);
+        });
+
+        // Function to handle data processing and plotting cities 
+        function plotCities(data) {
             data = data.map(function (d) {
                 return {
                     city: d.City,
+                    state: d['State/Province'],
                     country: d.Country,
-                    latitude: d.Latitude,
-                    longitude: d.Longitude,
+                    latitude: +d.Latitude,  // Convert to number
+                    longitude: +d.Longitude // Convert to number
                 };
             });
 
-            // Center the map based on data
+            // Center the map based on data 
             var bounds = new L.LatLngBounds([]);
             data.forEach(function (d) {
                 bounds.extend([d.latitude, d.longitude]);
             });
             mymap.fitBounds(bounds);
 
-            // Plot cities on the map with popups
+            // Plot cities on the map with popups 
             data.forEach(function (d) {
+                var popupText = `${d.city}${d.state ? ', ' + d.state : ''}, ${d.country}`;
                 L.marker([d.latitude, d.longitude])
-                    .addTo(mymap)
-                    .bindPopup(d.city + ', ' + d.country)
-                    .openPopup();
+                    .addTo(markersLayer)
+                    .bindPopup(popupText);
             });
-        });
+        }
+
+        // Function to remove cities (markers) from the map 
+        function removeCities() {
+            markersLayer.clearLayers();
+        } 
     </script>
 </body>
 
